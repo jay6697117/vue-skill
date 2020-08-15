@@ -1,72 +1,56 @@
 <template>
   <div class="about">
     <h1>timeNow: {{ timeNow }}</h1>
-    <Button @hook:updated="buttonClick" />
-    <div>
-      <label class="typo__label">Select with search</label>
-      <multiselect
-        v-model="multiselectValue"
-        :options="multiselectOptions"
-        :custom-label="selectedName"
-        placeholder="Please select one"
-        label="name"
-        track-by="name"
-      ></multiselect>
-      <pre class="language-json"><code>{{ multiselectValue  }}</code></pre>
-    </div>
+    <Button @hook:updated="buttonCompUpdate" />
+    <hr />
+    <h1 :style="{ color: userinfo.color }">{{ userinfo.name }}</h1>
   </div>
 </template>
 
 <script>
-import Button from '../components/Button.vue';
-import Multiselect from '../components/Multiselect/Multiselect.vue';
-import formatDateLocal from '../mixins/formatDate';
+import Button from '../components/Button';
+import formatDate from '../mixins/formatDate'; //mixins混入
+import { store, mutations } from '../ministore'; //手写mini版本vuex
 
 export default {
   name: 'About',
-  mixins: [formatDateLocal],
+  mixins: [formatDate], //mixins混入
   data() {
     return {
-      timeNow: this.formatDate(new Date()),
-      multiselectValue: { name: '' },
-      multiselectOptions: [
-        { name: 'Vue.js' },
-        { name: 'Rails' },
-        { name: 'Sinatra' },
-        { name: 'Laravel' },
-        { name: 'Phoenix' }
-      ]
+      timeNow: this.formatDate(new Date())
     };
   },
+  computed: {
+    userinfo() {
+      return store.userinfo;
+    }
+  },
   components: {
-    Button,
-    Multiselect
+    Button
   },
   methods: {
-    selectedName({ name }) {
-      return `${name}`;
-    },
-    buttonClick() {
-      console.log('buttonClick...');
+    buttonCompUpdate() {
+      console.log('003 About methods buttonCompUpdate', ' || ', 'Button组件的updated钩子函数被触发');
     }
   },
   created() {
-    this.$set(this.multiselectValue, 'name', this.multiselectOptions[0].name);
-
     const loadingInstance = this.$loading({ text: '正在加载...' });
     // 三秒钟后关闭
     setTimeout(() => {
       loadingInstance.close();
-    }, 1500);
+    }, 1000);
+
+    //mini版本vuex
+    mutations.setUserinfo({ name: '张三', color: 'blue' });
+    // 三秒钟后重新赋值
+    setTimeout(() => {
+      mutations.setUserinfo({ name: '李四', color: 'red' });
+    }, 3000);
   },
   mounted() {
-    console.log('this :>> ', this);
+    console.log('About this :>> ', this);
   }
 };
 </script>
 
-<style lang="less" scoped>
-/deep/ .multiselect__tags {
-  border: 1px solid red;
-}
-</style>
+<style lang="less" scoped></style>
